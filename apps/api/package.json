@@ -1,0 +1,22 @@
+{
+  "name": "@coachlibre/api",
+  "version": "1.0.0",
+  "description": "API Backend avec FastAPI et CrewAI",
+  "scripts": {
+    "dev": "uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8000",
+    "build": "echo 'No build step needed for Python'",
+    "test": "pytest",
+    "lint": "black . && isort . && flake8 .",
+    "docker:build": "docker build -t coachlibre-api .",
+    "docker:push": "docker push coachlibre-api"
+  },
+  "dependencies": {
+    "@coachlibre/shared": "workspace:*",
+    "@coachlibre/agents": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+} 
