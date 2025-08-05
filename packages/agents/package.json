@@ -1,0 +1,20 @@
+{
+  "name": "@coachlibre/agents",
+  "version": "1.0.0",
+  "description": "Définitions des agents CrewAI",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "@coachlibre/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+} 
