@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coachlibre-config
+  namespace: coachlibre
+data:
+  DATABASE_URL: "postgresql://coachlibre:coachlibre123@postgresql:5432/coachlibre"
+  QDRANT_URL: "http://qdrant:6333"
+  REDIS_URL: "redis://redis:6379"
+  API_URL: "http://api:8000"
+  FRONTEND_DOMAIN: "app.coachlibre.com"
+  BACKEND_DOMAIN: "api.coachlibre.com"
+  NODE_ENV: "production" 
