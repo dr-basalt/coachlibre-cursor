@@ -103,11 +103,11 @@ verify_build() {
         fi
     done
     
-    # Vérifier le frontend
-    if [ -d "apps/frontend/dist" ]; then
+    # Vérifier le frontend (Astro avec Vercel adapter)
+    if [ -d "apps/frontend/.vercel/output" ] || [ -d "apps/frontend/dist" ]; then
         print_success "✅ Frontend buildé avec succès"
     else
-        print_error "❌ Frontend n'a pas de dossier dist"
+        print_error "❌ Frontend n'a pas de dossier de build (.vercel/output ou dist)"
         return 1
     fi
     
