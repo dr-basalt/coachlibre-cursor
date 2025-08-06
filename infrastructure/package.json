@@ -1,0 +1,17 @@
+{
+  "name": "@coachlibre/infrastructure",
+  "version": "1.0.0",
+  "description": "Infrastructure as Code pour CoachLibre",
+  "scripts": {
+    "deploy": "echo 'Déploiement infrastructure - utilisez ./scripts/install-k3s.sh pour K3s ou docker-compose up pour Docker'",
+    "deploy:k3s": "../scripts/install-k3s.sh",
+    "deploy:docker": "cd .. && docker-compose up -d",
+    "deploy:helm": "helm install coachlibre ./helm-charts/coachlibre",
+    "build": "echo 'No build step needed for infrastructure'",
+    "test": "echo 'No tests for infrastructure'"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+} 

@@ -15,7 +15,6 @@ export default defineConfig({
       external: ['@coachlibre/shared', '@coachlibre/ui']
     }
   },
-  experimental: {
-    assets: true
-  }
+  // Configuration assets moderne
+  assets: 'auto'
 }); 
