@@ -11,11 +11,11 @@ COPY . .
 RUN npm install -g pnpm
 
 # Installer toutes les dépendances du workspace
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
-# Construire les packages du workspace
-RUN pnpm run build --filter=@coachlibre/ui
+# Construire les packages du workspace dans l'ordre correct
 RUN pnpm run build --filter=@coachlibre/shared
+RUN pnpm run build --filter=@coachlibre/ui
 
 # Build de l'application frontend
 RUN pnpm run build --filter=@coachlibre/frontend
