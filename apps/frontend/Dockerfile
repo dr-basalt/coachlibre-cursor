@@ -6,13 +6,12 @@ WORKDIR /app
 
 # Copier les fichiers de configuration
 COPY package*.json ./
-COPY pnpm-lock.yaml ./
 
 # Installer pnpm
 RUN npm install -g pnpm
 
 # Installer les dépendances
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Copier le code source
 COPY . .
@@ -31,10 +30,9 @@ RUN npm install -g pnpm
 # Copier les fichiers de production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
 
 # Installer uniquement les dépendances de production
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod
 
 # Exposer le port
 EXPOSE 3000
