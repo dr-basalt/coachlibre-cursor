@@ -10,10 +10,14 @@ COPY . .
 # Installer pnpm
 RUN npm install -g pnpm
 
-# Installer les dépendances avec le workspace
-RUN pnpm install --filter=@coachlibre/frontend
+# Installer toutes les dépendances du workspace
+RUN pnpm install
 
-# Build de l'application
+# Construire les packages du workspace
+RUN pnpm run build --filter=@coachlibre/ui
+RUN pnpm run build --filter=@coachlibre/shared
+
+# Build de l'application frontend
 RUN pnpm run build --filter=@coachlibre/frontend
 
 # Stage de production
