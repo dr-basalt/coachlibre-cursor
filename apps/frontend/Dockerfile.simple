@@ -4,21 +4,25 @@ FROM node:18-alpine AS builder
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier tout le workspace pour avoir accès aux packages
-COPY . .
-
 # Installer pnpm
 RUN npm install -g pnpm
 
-# Installer toutes les dépendances du workspace
+# Copier tout le projet
+COPY . .
+
+# Installer les dépendances de chaque package individuellement
+WORKDIR /app/packages/shared
 RUN pnpm install
+RUN pnpm run build
 
-# Construire les packages du workspace dans l'ordre correct
-RUN pnpm run build --filter=@coachlibre/shared
-RUN pnpm run build --filter=@coachlibre/ui
+WORKDIR /app/packages/ui
+RUN pnpm install
+RUN pnpm run build
 
-# Build de l'application frontend
-RUN pnpm run build --filter=@coachlibre/frontend
+# Installer et construire l'application frontend
+WORKDIR /app/apps/frontend
+RUN pnpm install
+RUN pnpm run build
 
 # Stage de production
 FROM node:18-alpine AS runner
@@ -33,7 +37,7 @@ COPY --from=builder /app/apps/frontend/dist ./dist
 COPY --from=builder /app/apps/frontend/package*.json ./
 
 # Installer uniquement les dépendances de production
-RUN pnpm install --prod --filter=@coachlibre/frontend
+RUN pnpm install --prod
 
 # Exposer le port
 EXPOSE 3000
@@ -44,4 +48,4 @@ ENV HOST=0.0.0.0
 ENV PORT=3000
 
 # Commande de démarrage
-CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"] 
+CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"]
