@@ -1,56 +1,52 @@
-# Utiliser l'image Node.js officielle
+# Build stage
 FROM node:18-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Installer pnpm
+# Install pnpm
 RUN npm install -g pnpm
 
-# Copier tout le projet
+# Copy workspace configuration
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
+
+# Copy all package.json files
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install dependencies
+RUN pnpm install
+
+# Copy source code
 COPY . .
 
-# Installer les dépendances de chaque package individuellement
-WORKDIR /app/packages/shared
-RUN pnpm install
-RUN pnpm run build
-
-WORKDIR /app/packages/ui
-RUN pnpm install
-RUN pnpm run build
-
-# Installer et construire l'application frontend
+# Build the frontend
 WORKDIR /app/apps/frontend
-RUN pnpm install
 RUN pnpm run build
 
-# Vérifier la structure de sortie
-RUN ls -la
-RUN ls -la .vercel/output/ || echo "Pas de .vercel/output"
-RUN ls -la dist/ || echo "Pas de dist"
-
-# Stage de production
+# Production stage
 FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Installer pnpm
+# Install pnpm
 RUN npm install -g pnpm
 
-# Copier les fichiers de production (essayer d'abord .vercel/output, puis dist)
-COPY --from=builder /app/apps/frontend/.vercel/output ./dist
-COPY --from=builder /app/apps/frontend/package*.json ./
+# Copy built files
+COPY --from=builder /app/apps/frontend/dist ./dist
+COPY --from=builder /app/apps/frontend/package.json ./
 
-# Installer uniquement les dépendances de production
+# Install only production dependencies
 RUN pnpm install --prod
 
-# Exposer le port
+# Expose port
 EXPOSE 3000
 
-# Variable d'environnement
+# Environment variables
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Commande de démarrage pour Vercel adapter
-CMD ["node", "dist/functions/render.func/index.js"]
+# Start the application
+CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"]

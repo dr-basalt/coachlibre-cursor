@@ -1,71 +1,73 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: coachlibre-frontend
+  name: coachlibre-frontend-real
   namespace: coachlibre
   labels:
-    app: coachlibre-frontend
+    app: coachlibre-frontend-real
     version: v1.0.0
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: coachlibre-frontend
+      app: coachlibre-frontend-real
   template:
     metadata:
       labels:
-        app: coachlibre-frontend
+        app: coachlibre-frontend-real
         version: v1.0.0
     spec:
       containers:
       - name: frontend
-        image: coachlibre/frontend:test
+        image: coachlibre/frontend:latest
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
             memory: "256Mi"
             cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 3000
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
-            port: 80
-          initialDelaySeconds: 5
+            port: 3000
+          initialDelaySeconds: 10
           periodSeconds: 5
         env:
         - name: NODE_ENV
           value: "production"
+        - name: VITE_API_URL
+          value: "https://api.coachlibre.local"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: coachlibre-frontend-service
+  name: coachlibre-frontend-real-service
   namespace: coachlibre
   labels:
-    app: coachlibre-frontend
+    app: coachlibre-frontend-real
 spec:
   type: ClusterIP
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 3000
     protocol: TCP
     name: http
   selector:
-    app: coachlibre-frontend
+    app: coachlibre-frontend-real
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: coachlibre-frontend-ingress
+  name: coachlibre-frontend-real-ingress
   namespace: coachlibre
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -73,13 +75,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: coachlibre.local
+  - host: app.coachlibre.local
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: coachlibre-frontend-service
+            name: coachlibre-frontend-real-service
             port:
               number: 80
