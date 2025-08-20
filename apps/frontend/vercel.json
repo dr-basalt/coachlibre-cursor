@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "functions": {
+    "dist/_astro/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}

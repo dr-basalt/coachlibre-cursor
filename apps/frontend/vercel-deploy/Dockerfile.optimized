@@ -1,0 +1,95 @@
+# Utiliser l'image Node.js officielle
+FROM node:18-alpine AS deps
+
+# Installer pnpm
+RUN npm install -g pnpm
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de configuration
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+
+# Copier les packages
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/ui/package.json ./packages/ui/
+COPY apps/frontend/package.json ./apps/frontend/
+
+# Installer les dépendances
+RUN pnpm install --frozen-lockfile
+
+# Stage de build des packages
+FROM node:18-alpine AS packages-builder
+
+WORKDIR /app
+
+# Installer pnpm
+RUN npm install -g pnpm
+
+# Copier les dépendances installées
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copier les fichiers de configuration
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+
+# Copier le code source des packages
+COPY packages/shared ./packages/shared
+COPY packages/ui ./packages/ui
+
+# Construire les packages dans l'ordre
+RUN pnpm run build --filter=@coachlibre/shared
+RUN pnpm run build --filter=@coachlibre/ui
+
+# Stage de build de l'application
+FROM node:18-alpine AS app-builder
+
+WORKDIR /app
+
+# Installer pnpm
+RUN npm install -g pnpm
+
+# Copier les dépendances et packages construits
+COPY --from=packages-builder /app/node_modules ./node_modules
+COPY --from=packages-builder /app/packages ./packages
+
+# Copier les fichiers de configuration
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+
+# Copier le code source de l'application
+COPY apps/frontend ./apps/frontend
+
+# Construire l'application
+RUN pnpm run build --filter=@coachlibre/frontend
+
+# Stage de production
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Installer pnpm
+RUN npm install -g pnpm
+
+# Copier les fichiers de production
+COPY --from=app-builder /app/apps/frontend/dist ./dist
+COPY --from=app-builder /app/apps/frontend/package*.json ./
+
+# Installer uniquement les dépendances de production
+RUN pnpm install --prod
+
+# Exposer le port
+EXPOSE 3000
+
+# Variable d'environnement
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# Commande de démarrage
+CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"]

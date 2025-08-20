@@ -10,6 +10,10 @@ RUN npm install -g pnpm
 # Copier tout le projet
 COPY . .
 
+# Installer l'adapter Node.js pour Astro
+WORKDIR /app/apps/frontend
+RUN pnpm add @astrojs/node
+
 # Installer les dépendances de chaque package individuellement
 WORKDIR /app/packages/shared
 RUN pnpm install
@@ -19,15 +23,12 @@ WORKDIR /app/packages/ui
 RUN pnpm install
 RUN pnpm run build
 
-# Installer et construire l'application frontend
+# Installer et construire l'application frontend avec l'adapter Node.js
 WORKDIR /app/apps/frontend
 RUN pnpm install
+# Copier la configuration Docker
+COPY astro.config.docker.mjs astro.config.mjs
 RUN pnpm run build
-
-# Vérifier la structure de sortie
-RUN ls -la
-RUN ls -la .vercel/output/ || echo "Pas de .vercel/output"
-RUN ls -la dist/ || echo "Pas de dist"
 
 # Stage de production
 FROM node:18-alpine AS runner
@@ -37,8 +38,8 @@ WORKDIR /app
 # Installer pnpm
 RUN npm install -g pnpm
 
-# Copier les fichiers de production (essayer d'abord .vercel/output, puis dist)
-COPY --from=builder /app/apps/frontend/.vercel/output ./dist
+# Copier les fichiers de production (adapter Node.js génère dist/)
+COPY --from=builder /app/apps/frontend/dist ./dist
 COPY --from=builder /app/apps/frontend/package*.json ./
 
 # Installer uniquement les dépendances de production
@@ -52,5 +53,5 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Commande de démarrage pour Vercel adapter
-CMD ["node", "dist/functions/render.func/index.js"]
+# Commande de démarrage pour adapter Node.js
+CMD ["node", "dist/server/entry.mjs"]

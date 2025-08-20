@@ -7,27 +7,28 @@ WORKDIR /app
 # Installer pnpm
 RUN npm install -g pnpm
 
-# Copier tout le projet
-COPY . .
+# Copier les fichiers de configuration workspace
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
 
-# Installer les dépendances de chaque package individuellement
-WORKDIR /app/packages/shared
+# Copier les packages dans l'ordre
+COPY packages/shared ./packages/shared
+COPY packages/ui ./packages/ui
+COPY apps/frontend ./apps/frontend
+
+# Installer les dépendances globalement
 RUN pnpm install
+
+# Construire les packages dans l'ordre
+WORKDIR /app/packages/shared
 RUN pnpm run build
 
 WORKDIR /app/packages/ui
-RUN pnpm install
 RUN pnpm run build
 
-# Installer et construire l'application frontend
+# Construire l'application frontend
 WORKDIR /app/apps/frontend
-RUN pnpm install
 RUN pnpm run build
-
-# Vérifier la structure de sortie
-RUN ls -la
-RUN ls -la .vercel/output/ || echo "Pas de .vercel/output"
-RUN ls -la dist/ || echo "Pas de dist"
 
 # Stage de production
 FROM node:18-alpine AS runner
@@ -37,8 +38,8 @@ WORKDIR /app
 # Installer pnpm
 RUN npm install -g pnpm
 
-# Copier les fichiers de production (essayer d'abord .vercel/output, puis dist)
-COPY --from=builder /app/apps/frontend/.vercel/output ./dist
+# Copier les fichiers de production
+COPY --from=builder /app/apps/frontend/dist ./dist
 COPY --from=builder /app/apps/frontend/package*.json ./
 
 # Installer uniquement les dépendances de production
@@ -52,5 +53,5 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Commande de démarrage pour Vercel adapter
-CMD ["node", "dist/functions/render.func/index.js"]
+# Commande de démarrage
+CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"]

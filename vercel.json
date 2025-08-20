@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm install && pnpm run build",
+  "installCommand": "pnpm install",
+  "framework": "astro",
+  "outputDirectory": "apps/frontend/dist",
+  "functions": {
+    "apps/frontend/dist/_astro/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
