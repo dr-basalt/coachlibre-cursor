@@ -1,47 +1,38 @@
-# Utiliser l'image Node.js officielle
+# Build stage
 FROM node:18-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier tout le workspace pour avoir accès aux packages
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
 COPY . .
 
-# Installer pnpm
-RUN npm install -g pnpm
+# Build the frontend
+WORKDIR /app/apps/frontend
+RUN pnpm run build
 
-# Installer toutes les dépendances du workspace
-RUN pnpm install
+# Production stage
+FROM nginx:alpine
 
-# Construire les packages du workspace dans l'ordre correct
-RUN pnpm run build --filter=@coachlibre/shared
-RUN pnpm run build --filter=@coachlibre/ui
+# Copy built files
+COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
 
-# Build de l'application frontend
-RUN pnpm run build --filter=@coachlibre/frontend
+# Copy nginx configuration
+COPY apps/frontend/nginx.conf /etc/nginx/nginx.conf
 
-# Stage de production
-FROM node:18-alpine AS runner
+# Expose port
+EXPOSE 80
 
-WORKDIR /app
-
-# Installer pnpm
-RUN npm install -g pnpm
-
-# Copier les fichiers de production
-COPY --from=builder /app/apps/frontend/dist ./dist
-COPY --from=builder /app/apps/frontend/package*.json ./
-
-# Installer uniquement les dépendances de production
-RUN pnpm install --prod --filter=@coachlibre/frontend
-
-# Exposer le port
-EXPOSE 3000
-
-# Variable d'environnement
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
-
-# Commande de démarrage
-CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"] 
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"] 
