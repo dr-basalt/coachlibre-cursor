@@ -27,3 +27,4 @@ sed -i 's/"@coachlibre\/shared": "workspace:\*"/"@coachlibre\/shared": "file:.\/
 
 echo "✅ Déploiement Vercel préparé dans apps/frontend/vercel-deploy/"
 echo "📁 Utilisez ce répertoire pour votre déploiement Vercel"
+
