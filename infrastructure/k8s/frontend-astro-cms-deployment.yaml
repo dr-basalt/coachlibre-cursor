@@ -1,0 +1,270 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coachlibre-frontend-astro-cms
+  namespace: coachlibre
+  labels:
+    app: coachlibre-frontend-astro-cms
+    version: v1.0.0
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coachlibre-frontend-astro-cms
+  template:
+    metadata:
+      labels:
+        app: coachlibre-frontend-astro-cms
+        version: v1.0.0
+    spec:
+      containers:
+      - name: frontend-astro-cms
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        env:
+        - name: NODE_ENV
+          value: "production"
+        volumeMounts:
+        - name: astro-cms-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: astro-cms-content
+        configMap:
+          name: coachlibre-astro-cms-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coachlibre-astro-cms-content
+  namespace: coachlibre
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CoachLibre - CMS Access</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#667eea',
+                            secondary: '#764ba2'
+                        }
+                    }
+                }
+            }
+        </script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            body { font-family: 'Inter', sans-serif; }
+        </style>
+    </head>
+    <body class="bg-gradient-to-br from-primary to-secondary min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Header -->
+            <header class="text-center mb-12">
+                <h1 class="text-5xl font-bold text-white mb-4">🚀 CoachLibre</h1>
+                <p class="text-xl text-white/90">Accès au CMS - TinaCMS</p>
+            </header>
+
+            <!-- Main Content -->
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-4">📝 Interface d'Administration</h2>
+                        <p class="text-gray-600 mb-6">Accédez à l'interface TinaCMS pour éditer le contenu</p>
+                    </div>
+
+                    <!-- CMS Access Buttons -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+                            <h3 class="text-xl font-semibold text-blue-800 mb-4">🎨 Interface TinaCMS</h3>
+                            <p class="text-blue-600 mb-4">Interface d'administration complète pour éditer le contenu</p>
+                            <a href="/admin" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                Accéder au CMS
+                            </a>
+                        </div>
+                        
+                        <div class="bg-green-50 rounded-xl p-6 border-2 border-green-200">
+                            <h3 class="text-xl font-semibold text-green-800 mb-4">📄 Gestion de Contenu</h3>
+                            <p class="text-green-600 mb-4">Créez et modifiez des pages et articles</p>
+                            <a href="/admin/#/collections/page" class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                                Gérer les Pages
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Instructions d'Utilisation</h3>
+                        <div class="space-y-3 text-gray-600">
+                            <div class="flex items-start space-x-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">1</span>
+                                <p>Cliquez sur "Accéder au CMS" pour ouvrir l'interface TinaCMS</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">2</span>
+                                <p>Connectez-vous avec vos identifiants TinaCMS</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">3</span>
+                                <p>Éditez le contenu des pages et articles</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">4</span>
+                                <p>Sauvegardez vos modifications</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collections Available -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-3">📄 Pages</h4>
+                            <p class="text-purple-600 mb-3">Gérez les pages statiques du site</p>
+                            <ul class="text-sm text-purple-600 space-y-1">
+                                <li>• Page d'accueil</li>
+                                <li>• À propos</li>
+                                <li>• Services</li>
+                                <li>• Contact</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                            <h4 class="text-lg font-semibold text-orange-800 mb-3">📝 Articles</h4>
+                            <p class="text-orange-600 mb-3">Créez et publiez des articles</p>
+                            <ul class="text-sm text-orange-600 space-y-1">
+                                <li>• Articles de blog</li>
+                                <li>• Actualités</li>
+                                <li>• Tutoriels</li>
+                                <li>• Ressources</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Development Info -->
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">🛠️ Développement Local</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Pour développer localement :</h4>
+                            <div class="space-y-2 text-gray-600">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span>Installer Node.js et pnpm</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span>cd apps/frontend</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span>pnpm install</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span>pnpm run tina:dev</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Commandes disponibles :</h4>
+                            <div class="space-y-2 text-gray-600">
+                                <div class="bg-gray-100 p-2 rounded text-sm font-mono">
+                                    pnpm run dev
+                                </div>
+                                <div class="bg-gray-100 p-2 rounded text-sm font-mono">
+                                    pnpm run tina:dev
+                                </div>
+                                <div class="bg-gray-100 p-2 rounded text-sm font-mono">
+                                    pnpm run build
+                                </div>
+                                <div class="bg-gray-100 p-2 rounded text-sm font-mono">
+                                    pnpm run tina:build
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="text-center mt-12 text-white/70">
+                <p>CoachLibre - Interface CMS TinaCMS</p>
+                <p class="mt-2">Déployé le <span id="timestamp"></span></p>
+            </footer>
+        </div>
+
+        <script>
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('fr-FR');
+        </script>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coachlibre-frontend-astro-cms-service
+  namespace: coachlibre
+  labels:
+    app: coachlibre-frontend-astro-cms
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: coachlibre-frontend-astro-cms
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coachlibre-frontend-astro-cms-ingress
+  namespace: coachlibre
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: coachlibre.infra.ori3com.cloud
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: coachlibre-frontend-astro-cms-service
+            port:
+              number: 80
