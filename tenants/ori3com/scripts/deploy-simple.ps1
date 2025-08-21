@@ -28,3 +28,4 @@ Write-Host "🎉 Déploiement terminé !" -ForegroundColor Green
 Write-Host "🌐 Site accessible sur: http://coachlibre.infra.ori3com.cloud" -ForegroundColor Cyan
 
 
+

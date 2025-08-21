@@ -166,3 +166,4 @@ echo -e "\n🔄 Redémarrez votre terminal ou exécutez:"
 echo "   source ~/.bashrc"
 
 
+

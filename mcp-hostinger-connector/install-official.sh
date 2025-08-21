@@ -218,3 +218,4 @@ echo -e "\n📖 Documentation: README.md"
 echo "🆘 Support: Ouvrez une issue sur GitHub en cas de problème"
 
 
+

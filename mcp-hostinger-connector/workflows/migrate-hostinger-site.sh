@@ -405,3 +405,4 @@ echo "4. Configurer le DNS avec: ./tenants/$TARGET_TENANT/scripts/configure-dns.
 echo -e "\n📖 Documentation: ./tenants/$TARGET_TENANT/README.md"
 
 
+
