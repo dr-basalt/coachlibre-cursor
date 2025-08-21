@@ -1,0 +1,60 @@
+{
+  "name": "mcp-hostinger-connector",
+  "version": "1.0.0",
+  "description": "Connecteur MCP pour les sites CMS Hostinger avec serveur officiel",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "jest",
+    "install-hostinger-mcp": "npm install -g hostinger-api-mcp"
+  },
+  "keywords": [
+    "mcp",
+    "hostinger",
+    "cms",
+    "wordpress",
+    "api",
+    "connector",
+    "official"
+  ],
+  "author": "CoachLibre Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^21.0.0",
+    "wordpress-api": "^1.0.0",
+    "dotenv": "^16.3.0",
+    "hostinger-api-mcp": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  },
+  "mcp": {
+    "servers": {
+      "hostinger-official": {
+        "command": "hostinger-api-mcp",
+        "env": {
+          "DEBUG": "false",
+          "APITOKEN": "your_api_token_here"
+        }
+      },
+      "hostinger-custom": {
+        "command": "node",
+        "args": ["dist/index.js"],
+        "env": {
+          "HOSTINGER_API_KEY": "your_api_key_here",
+          "HOSTINGER_DOMAIN": "ori3com.cloud"
+        }
+      }
+    }
+  }
+}
